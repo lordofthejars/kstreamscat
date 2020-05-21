@@ -1,22 +1,31 @@
 package com.lordofthejars.kstreamscat;
 
+import javax.inject.Inject;
+
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
+import io.quarkus.runtime.QuarkusApplication;
+import io.quarkus.runtime.annotations.QuarkusMain;
 import picocli.CommandLine;
 
-public class KStreamsCatMain {
+@QuarkusMain
+public class KStreamsCatMain implements QuarkusApplication {
 
-    public static void main(String... args) {
+    @Inject
+    CommandLine.IFactory factory;
+
+    @Override
+    public int run(String... args) {
 
         final KStreamsCatOptions options = CommandLine.populateCommand(new KStreamsCatOptions(), args);
 
         if (options.help) {
             CommandLine.usage(new KStreamsCatMain(), System.out);
-            return;
+            return 0;
         }
 
         final TopologyProducer topologyProducer = new TopologyProducer();
@@ -32,16 +41,17 @@ public class KStreamsCatMain {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
 
         if (options.globalKTable) {
-            final ReadOnlyKeyValueStore<Integer, String> keyValueStore = streams
+            final ReadOnlyKeyValueStore<?,?> keyValueStore = streams
                     .store(StoreNameGenerator.generate(options), QueryableStoreTypes.keyValueStore());
 
-            final KeyValueIterator<Integer, String> range = keyValueStore.all();
+            final KeyValueIterator<?, ?> range = keyValueStore.all();
             while (range.hasNext()) {
-                final KeyValue<Integer, String> next = range.next();
+                final KeyValue<?, ?> next = range.next();
                 System.out.println(next.key + ": " + next.value);
             }
         }
         //streams.close();
+        return 0;
     }
     
 }

@@ -10,7 +10,6 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.state.KeyValueStore;
 
 public class TopologyProducer {
     
@@ -20,10 +19,8 @@ public class TopologyProducer {
         if (options.globalKTable) {
             builder.globalTable(
                             options.topic,
-                            Materialized.<Bytes, String, KeyValueStore<Bytes, byte[]>>as(
+                            Materialized.as(
                             StoreNameGenerator.generate(options))
-                            .withKeySerde(Serdes.Bytes())
-                            .withValueSerde(Serdes.String())
                             );
         }
 

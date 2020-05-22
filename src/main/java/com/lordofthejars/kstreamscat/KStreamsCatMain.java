@@ -21,10 +21,11 @@ public class KStreamsCatMain implements QuarkusApplication {
     @Override
     public int run(String... args) {
 
-        final KStreamsCatOptions options = CommandLine.populateCommand(new KStreamsCatOptions(), args);
-
+        KStreamsCatOptions options = new KStreamsCatOptions();
+        new CommandLine(options, factory).parseArgs(args);
+        
         if (options.help) {
-            CommandLine.usage(new KStreamsCatMain(), System.out);
+            CommandLine.usage(options, System.out);
             return 0;
         }
 

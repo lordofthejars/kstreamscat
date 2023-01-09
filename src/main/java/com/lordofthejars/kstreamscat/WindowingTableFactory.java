@@ -22,14 +22,14 @@ public class WindowingTableFactory {
         if (options.timeWindow > 0) {
             final KStream<String, String> stream = builder.stream(options.topic, Consumed.with(Serdes.String(), Serdes.String()));
             table = stream.groupByKey()
-                .windowedBy(TimeWindows.of(Duration.ofSeconds(options.timeWindow)))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(options.timeWindow)))
                 .count(Materialized.with(Serdes.String(), Serdes.Long()));
         }
 
         if (options.sessionWindow > 0) {
             final KStream<String, String> stream = builder.stream(options.topic, Consumed.with(Serdes.String(), Serdes.String()));
             table = stream.groupByKey()
-                .windowedBy(SessionWindows.with(Duration.ofSeconds(options.sessionWindow)))
+                .windowedBy(SessionWindows.ofInactivityGapWithNoGrace(Duration.ofSeconds(options.sessionWindow)))
                 .count(Materialized.with(Serdes.String(), Serdes.Long()));
         }
 

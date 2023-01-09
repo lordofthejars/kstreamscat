@@ -2,6 +2,7 @@ package com.lordofthejars.kstreamscat;
 
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -32,8 +33,12 @@ public class KStreamsCatMain {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
 
         if (options.globalKTable) {
-            final ReadOnlyKeyValueStore<Integer, String> keyValueStore = streams
-                    .store(StoreNameGenerator.generate(options), QueryableStoreTypes.keyValueStore());
+            final ReadOnlyKeyValueStore<Integer, String> keyValueStore = 
+                streams.store(
+                    StoreQueryParameters.fromNameAndType(
+                        StoreNameGenerator.generate(options), QueryableStoreTypes.keyValueStore()
+                    )
+                );
 
             final KeyValueIterator<Integer, String> range = keyValueStore.all();
             while (range.hasNext()) {
@@ -41,7 +46,7 @@ public class KStreamsCatMain {
                 System.out.println(next.key + ": " + next.value);
             }
         }
-        //streams.close();
+
     }
     
 }
